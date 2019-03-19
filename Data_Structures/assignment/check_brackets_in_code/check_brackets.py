@@ -13,18 +13,36 @@ def find_mismatch(text):
     opening_brackets_stack = []
     for i, next in enumerate(text):
         if next in "([{":
-            # Process opening bracket, write your code here
-            pass
-
+            # append to stack
+            opening_brackets_stack.append(next)
         if next in ")]}":
-            # Process closing bracket, write your code here
-            pass
+            if opening_brackets_stack == []: # if opening brackets is empty
+                return i
+            last = opening_brackets_stack.pop()
+            if (last == '{' and next == '}') | (last == '(' and next == ')') | (last == '[' and next == ']'):
+                print(last, next, opening_brackets_stack, i)
+                opening_brackets_stack.pop()
+            else:
+                return i
+    return 'Success'
+
+'''
+{{}}[
+
+{ -> [ '{' ] 
+{ -> [ '{', '{' ]
+} -> [ '{' ]
+} -> [ ]
+[ -> 
+
+'''
 
 
 def main():
     text = input()
     mismatch = find_mismatch(text)
     # Printing answer, write your code here
+    print(mismatch)
 
 
 if __name__ == "__main__":
