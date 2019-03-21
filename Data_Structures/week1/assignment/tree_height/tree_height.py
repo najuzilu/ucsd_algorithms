@@ -15,7 +15,15 @@ class TreeHeight(object):
         self.parent = parent
 
     def get_height(self, node):
-        
+        if len(node.children) == 0:
+            return -1
+
+        height = 1
+        for child in node.children:
+            new_height = self.get_height(child) + 1
+            height = max(height, new_height)
+        return height
+
 
     def compute(self):
         node_array = []
@@ -27,14 +35,13 @@ class TreeHeight(object):
                 root = node_array[j]
             else:
                 node_array[self.parent[j]].children.append(node_array[j])
-        return self.get_height(root)
+        return self.get_height(root) + 1
 
 
 def main():
     n = int(input())
     parent = list(map(int, input().split()))
-    c = TreeHeight(n, parent)
-    c.get_height()
+    print(TreeHeight(n, parent).compute())
 
 # In Python, the default limit on recursion depth is rather low,
 # so raise it here for this problem. Note that to take advantage
