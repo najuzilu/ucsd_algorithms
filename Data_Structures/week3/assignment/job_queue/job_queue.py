@@ -60,7 +60,7 @@ class JobQueue:
 				self.heap[leftIndex], self.heap[k] = self.heap[k], self.heap[leftIndex]
 				self.siftDown(leftIndex)
 			elif left[1] == current[1]:
-				if left[1] < current[0]:
+				if left[0] < current[0]:
 					self.heap[leftIndex], self.heap[k] = self.heap[k], self.heap[leftIndex]
 					self.siftDown(leftIndex)
 
