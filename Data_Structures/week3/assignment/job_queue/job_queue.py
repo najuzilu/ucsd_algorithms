@@ -2,10 +2,8 @@
 
 class JobQueue:
 	def read_data(self):
-		# self.num_workers, m = map(int, input().split())
-		# self.jobs = list(map(int, input().split()))
-		self.num_workers, m = 14, 3
-		self.jobs = [2,11,6]
+		self.num_workers, m = map(int, input().split())
+		self.jobs = list(map(int, input().split()))
 		assert m == len(self.jobs)
 
 	def write_response(self):
