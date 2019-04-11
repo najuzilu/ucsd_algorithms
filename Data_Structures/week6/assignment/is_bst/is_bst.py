@@ -13,30 +13,29 @@ def IsBinarySearchTree():
 		return True
 
 
-def inOrder(i = 0, value = 0):
+def inOrder(i = 0):
+	global prev_value
 	node = tree[i]
-	# if node[0] <= node_value:
-	# 	return False
-	# else:
-	# 	node_value = node[0]
 
 	if node[1] != -1:
 		left_child = tree[node[1]]
-		# print('left_child {} - current {}'.format(left_child[0], node[0]))
-		inOrder(node[1], value)
-	print(node[0], value)
-	if node[0] <= value:
+		inOrder(node[1])
+
+	# print(node[0], prev_value)
+	if node[0] <= prev_value:
 		return False
 	else:
-		value = node[0]
+		prev_value = node[0]
+
 	if node[2] != -1:
 		right_child = tree[node[2]]
-		# print('right_child {} - current {}'.format(left_child[0], node[0]))
-		inOrder(node[2], value)
+		inOrder(node[2])
+	return True
 
 
 def main():
 	# nodes = int(sys.stdin.readline().strip())
+	# global tree
 	# tree = []
 	# for i in range(nodes):
 	# 	tree.append(list(map(int, sys.stdin.readline().strip().split())))
@@ -61,19 +60,41 @@ def main():
 	# nodes = 5
 	# tree = [[1,-1,1],[2,-1,2],[3,-1,3],[4,-1,4],[5,-1,-1]]
 
+	# Test 5
 	# nodes = 7
 	# global tree
 	# tree = [[4, 1, 2], [2, 3, 4], [6, 5, 6], [1, -1, -1], [3, -1, -1], [5, -1, -1], [7, -1, -1]]
 
-	nodes = 4
-	global tree
-	tree = [[4,1,-1],[2,2,3],[1,-1,-1],[5,-1,-1]]
+	# Test 6
+	# nodes = 4
+	# global tree
+	# tree = [[4,1,-1],[2,2,3],[1,-1,-1],[5,-1,-1]]
 
-	print(IsBinarySearchTree())
+	# Test 7
+	# nodes = 3
+	# global tree
+	# tree = [[-887440904, -1, 1], [-887440903, -1, 2], [-13646870, -1, -1]]
 
-	# if IsBinarySearchTree():
-	# 	print("CORRECT")
-	# else:
-	# 	print("INCORRECT")
+	# Test 8
+	# nodes = 7
+	# global tree
+	# tree = [[4, 1, 2],[2, 3, 4],[6, 5, 6],[1, -1, -1],[3, -1, -1],[4, -1, -1],[7, -1, -1]]
+
+	# Test 9
+	# nodes = 2
+	# global tree
+	# tree = [[2147483647, -1, 1], [2147483647, -1, -1]]
+
+	# Test 10
+	# nodes = 2
+	# global tree
+	# tree = [[-2147483648, 1, -1],[-2147483648, -1, -1]]
+
+	global prev_value
+	prev_value = -float("inf")
+	if IsBinarySearchTree():
+		print("CORRECT")
+	else:
+		print("INCORRECT")
 
 threading.Thread(target=main).start()
