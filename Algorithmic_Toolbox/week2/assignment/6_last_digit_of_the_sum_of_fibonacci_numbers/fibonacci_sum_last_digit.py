@@ -1,21 +1,19 @@
 # Uses python3
 import sys
 
-def fibonacci_sum_naive(n):
-    if n <= 1:
-        return n
-
-    previous = 0
-    current  = 1
-    sum      = 1
-
-    for _ in range(n - 1):
-        previous, current = current, previous + current
-        sum += current
-
-    return sum % 10
+def fibonacci_sum(n):
+	if n <= 1:
+		return n
+	array = [None] * (n + 1)
+	array[0] = 0
+	array[1] = 1
+	answer = 1
+	for i in range(2, n + 1):
+		array[i] = (array[i - 1] + array[i - 2]) % 10
+	return array[n]
 
 if __name__ == '__main__':
-    input = sys.stdin.read()
-    n = int(input)
-    print(fibonacci_sum_naive(n))
+	# input = sys.stdin.read()
+	# n = int(input)
+	n = int(input())
+	print(fibonacci_sum(n))
