@@ -17,3 +17,4 @@ if __name__ == '__main__':
 	# n = int(input)
 	n = int(input())
 	print(fibonacci_sum(n))
+	print(get_fibonacci_huge(n-1, 10), get_fibonacci_huge(n-2, 10), get_fibonacci_huge(n, 10))
