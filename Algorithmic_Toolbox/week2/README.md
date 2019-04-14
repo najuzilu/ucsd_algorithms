@@ -134,3 +134,16 @@ _Big-O is only asymptotic_
 For functions f, g. N -> R we say that:
 * `f(n) = $\Gamma$ (g(n)) or f >= g if for some c, f(n) >= c * g(n)` (f grows no slower than g)
 * `f(n) = $\Theta$ (g(n)) or f ~ g if f = O(g) and f = $\Gamma$ (g)` (f grows at the same rate as g)
+
+## Course Overview ##
+
+Three most common algorithmic design techniques:
+* Greedy Algorithms
+* Divide and Conquer
+* Dynamic Programming
+
+Levels of Design:
+* Naive Algorithm: definition to algorithm. Slow!
+* Algorithm by way of standard tools: standard techniques
+* Optimized Algorithm: improve existing algorithm
+* Magic algorithm: unique insight
