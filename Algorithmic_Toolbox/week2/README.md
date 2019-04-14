@@ -103,3 +103,34 @@ return EuclidGCD(b, a')
 What is GCD(357,234)? (You might want to use the Euclidean Algorithm)  
 **Answer**: 3
 
+## Big-O Notation ##
+
+We want to:
+* Measure runtime without knowing details how the program works, how the computer works
+* Get results that work for large inputs
+
+Idea:  
+All of these issues can multiply runtimes by (large) constant.
+
+Consider **asymptotic** runtimes. How does runtime **scale** with input size?
+
+Runtimes:  
+`log n` < `sqrt(n)` < `n` < `n log n` < `n^2` < `2^n`
+
+**Definition of Big-O Notation**:  
+f(n) = O( g(n) ) (f is Big-O of g) or f <= g if there exist constants N and c so that for all n >= N, f(n) <= c * g(n)
+
+_Big-O is only asymptotic_
+
+**Common Rules**:  
+* `n^a < n^b` for 0 < a < b:
+	* `n = O(n^2), sqrt(n) = O(n)`
+* `n^a < b^n` (a > 0, b > 1):
+	* `n^5 = O(sqrt(2)^n), n^100 = O(1.1^n)`
+* `(log n)^a < n^b` (a, b > 0):
+	* `(log n)^3 = O(sqrt(n)), n log n = O(n^2)`
+
+**Other notations**:  
+For functions f, g. N -> R we say that:
+* `f(n) = $\Gamma$ (g(n)) or f >= g if for some c, f(n) >= c * g(n)` (f grows no slower than g)
+* `f(n) = $\Theta$ (g(n)) or f ~ g if f = O(g) and f = $\Gamma$ (g)` (f grows at the same rate as g)
