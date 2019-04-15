@@ -8,31 +8,30 @@ threading.stack_size(2**30)  # new thread will get stack of such size
 
 def IsBinarySearchTree():
 	global tree
-	if len(tree) > 1:
-		if inOrder() == None:
-			return True
-		else:
-			return False
-	else:
+	if len(tree) < 1:
 		return True
+	answer = inOrder()
+	return answer
 
 def inOrder(i = 0):
 	global tree
 	global prev_value
 
 	node = tree[i]
-
 	if node[1] != -1:
-		inOrder(node[1])
+		if not inOrder(node[1]):
+			return False
 
-	print(node[0], prev_value)
 	if node[0] <= prev_value:
 		return False
 	else:
 		prev_value = node[0]
 
 	if node[2] != -1:
-		inOrder(node[2])
+		if not inOrder(node[2]):
+			return False
+	return True	
+
 
 def main():
 	global tree
