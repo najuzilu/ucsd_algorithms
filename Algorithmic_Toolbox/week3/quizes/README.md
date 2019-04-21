@@ -10,3 +10,14 @@
 
 3. You need to find an integer 23 <= x <= 73 with the largest product of digits. You use a greedy strategy: first, determine the largest possible first digit (tens) of x, then determine the largest possible second digit (ones) of x (among all the numbers in the range from 23 to 73 whose first digit is equal to the digit selected at the first step). Will this greedy strategy work correctly?  
 **Answer**: No
+
+## Fractional Knapsack Quiz ##
+
+1. You have a knapsack of capacity 10kg and three items. First item has weight 20kg and value 20, second item has weight 5kg and value 10. Third item has weight 4 kg and value 20. You want to maximize the total value of the fractions of items that fit into your knapsack. What is the safe move?  
+**Answer**: Take the whole third item.
+
+2. What is the next safe move in the previous problem?  
+**Answer**: Take the whole second item.
+
+3. What is the last move?  
+**Answer**: Take 1 kg of the first item.
