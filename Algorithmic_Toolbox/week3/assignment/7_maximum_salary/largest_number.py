@@ -12,7 +12,10 @@ def largest_number(a):
 			if digit[0] > maxDigit[0]:
 				maxDigit = digit
 			elif digit[0] == maxDigit[0]:
-				if len(digit) < len(maxDigit):
+				# compare
+				first_concat = digit + maxDigit
+				second_concat = maxDigit + digit
+				if first_concat >= second_concat:
 					maxDigit = digit
 		res += maxDigit
 		a.remove(maxDigit)
