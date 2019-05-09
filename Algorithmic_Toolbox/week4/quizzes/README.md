@@ -1,4 +1,4 @@
-## Linear Search and Binary Search - Practice Quiz ##
+## Linear Search and Binary Search Quiz ##
 
 1. You have an array with 1023 numbers. You use linear search to determine whether number 239 is in this array or not. How many elements of the array will you look at if number 239 is not present in the array?  
 **Answer**: 1023
@@ -22,3 +22,10 @@
 
 3. How to apply fast polynomial multiplication algorithm to multiply very big integer numbers (containing hundreds of thousands of digits) faster?  
 **Answer**: For a number A = ...(_select long answer_)
+
+## Master Theorem Quiz ##
+
+1. Mark all the correct statements.  
+**Answer**: 
+* `If T(n)=T(n/2)+O(1) then T(n)=O(log n)`
+* `If T(n)=8T(n/2)+O(n^2) then T(n)=O(n^4)`
