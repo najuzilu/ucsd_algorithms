@@ -11,3 +11,14 @@
 
 4. What is the maximum number of iterations a binary search will make to find some number in the array [1, 2, 3, 5, 8, 13, 21, 34]?  
 **Answer**: 4
+
+## Polynomial Multiplication Quiz ##
+
+1. For `n = 1024`, compute how many operations will the faster divide and conquer algorithm from the lectures perform, using the formula `3^(log base 2 of n)` for the number of operations.  
+**Answer**: 
+
+2. What is the key formula used in the faster divide and conquer algorithm to decrease the number of multiplications needed from 4 to 3?  
+**Answer**: `a_1 b_0 + a_0 b_1 = (a_0 + a_1) (b_0 + b_1) - a_0 b_0 - a_1 b_1`
+
+3. How to apply fast polynomial multiplication algorithm to multiply very big integer numbers (containing hundreds of thousands of digits) faster?  
+**Answer**: For a number A = ...(_select long answer_)
