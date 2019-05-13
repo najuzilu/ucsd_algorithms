@@ -29,3 +29,17 @@
 **Answer**: 
 * `If T(n)=T(n/2)+O(1) then T(n)=O(log n)`
 * `If T(n)=8T(n/2)+O(n^2) then T(n)=O(n^4)`
+
+## Sorting Quiz ##
+
+1. What is the running time of selecting the minimum element on each iteration of the selection sort?  
+**Answer**: O(n)
+
+2. Can we use the merging procedure from the lectures to merge the arrays [1, 3, 2, 5, 4] and [5, 6, 7, 8, 9] in order to receive a sorted array?  
+**Answer**: No
+
+3. How many operations are needed to merge two sorted arrays of sizes m and n respectively?  
+**Answer**: O(n + m)
+
+4. Can you use Count Sort to sort an array of positive real numbers which are less than 100, such as [0.572, 0.25, 2.34, 3.14159, 2.781828, 42], in O(n) time?  
+**Answer**: No
