@@ -43,3 +43,17 @@
 
 4. Can you use Count Sort to sort an array of positive real numbers which are less than 100, such as [0.572, 0.25, 2.34, 3.14159, 2.781828, 42], in O(n) time?  
 **Answer**: No
+
+## Quick Sort Quiz ##
+
+1. What is the worst case running time of Quick Sort?  
+**Answer**: `O(n^2)`
+
+2. What is the running time of the Partition procedure?  
+**Answer**: `O(n)`
+
+3. What is the amount of additional memory that regular Quick Sort uses (besides the array being sorted) in the worst case?  
+**Answer**: `O(n)`
+
+4. Which parts need to be sorted in the Quick Sort algorithm after applying the 3-way partition?  
+**Answer**: Only the part with the elements less than the pivot and the part with the elements greater than the pivot.
