@@ -7,7 +7,7 @@ def merge(left_array, right_array):
 	while left_array != [] and right_array != []:
 		left_element = left_array[0]
 		right_element = right_array[0]
-		if left_element < right_element:
+		if left_element <= right_element:
 			merged_array.append(left_element)
 			left_array.pop(0)
 		else:
@@ -27,13 +27,13 @@ def get_number_of_inversions(a, b, left, right):
 	ave = (left + right) // 2
 	left_array, left_count = get_number_of_inversions(a, b, left, ave)
 	right_array, right_count = get_number_of_inversions(a, b, ave, right)
-	number_of_inversions += left_count + right_count
+	number_of_inversions = number_of_inversions + left_count + right_count
 	merged_array, merged_count = merge(left_array, right_array)
-	return merged_array, merged_count
+	number_of_inversions += merged_count
+	return merged_array, number_of_inversions
 
 if __name__ == '__main__':
 	input = sys.stdin.read()
 	n, *a = list(map(int, input.split()))
 	b = n * [0]
-	print(a)
-	print(get_number_of_inversions(a, b, 0, len(a)))
+	print(get_number_of_inversions(a, b, 0, len(a))[1])
