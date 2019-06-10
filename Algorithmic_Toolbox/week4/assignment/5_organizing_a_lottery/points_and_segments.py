@@ -27,21 +27,27 @@ def sort_array(array, left, right):
 	sorted_array = merge(left_array, right_array)
 	return sorted_array
 
-def mod_binary_search(a, x, left, right):
+def binary_search_lowerbount(a, x, left, right):
 	if right <= left:
 		return left - 1
 	mid = left + (right - left) // 2
 	if x == a[mid]:
-		return mod_binary_search(a, x, left, mid)
+		return binary_search_lowerbount(a, x, mid + 1, right)
 	elif x < a[mid]:
-		return mod_binary_search(a, x, left, mid)
+		return binary_search_lowerbount(a, x, left, mid)
 	else:
-		return mod_binary_search(a, x, mid + 1, right)
+		return binary_search_lowerbount(a, x, mid + 1, right)
 
-def check_tail(idx, array, p):
-	while idx + 1 < len(array) and array[idx + 1] == p:
-		idx += 1
-	return idx
+def binary_search_upperbound(a, x, left, right):
+	if right <= left:
+		return left - 1
+	mid = left + (right - left) // 2
+	if x == a[mid]:
+		return binary_search_upperbound(a, x, left, mid)
+	elif x < a[mid]:
+		return binary_search_upperbound(a, x, left, mid)
+	else:
+		return binary_search_upperbound(a, x, mid + 1, right)
 
 def fast_count_segments(starts, ends, points):
 	cnt = [0] * len(points)	
@@ -51,9 +57,8 @@ def fast_count_segments(starts, ends, points):
 	ends_sorted = sort_array(ends, 0, len(ends))
 	# step3: modified binary search for points (n log m)
 	for index, point in enumerate(points):
-		start_idx = mod_binary_search(starts_sorted, point, 0, len(starts_sorted))
-		end_idx = mod_binary_search(ends_sorted, point, 0, len(ends_sorted))
-		start_idx = check_tail(start_idx, starts_sorted, point)
+		start_idx = binary_search_lowerbount(starts_sorted, point, 0, len(starts_sorted))
+		end_idx = binary_search_upperbound(ends_sorted, point, 0, len(ends_sorted))
 		cnt[index] = start_idx - end_idx
 	return cnt
 
@@ -74,7 +79,6 @@ if __name__ == '__main__':
 	ends   = data[3:2 * n + 2:2]
 	points = data[2 * n + 2:]
 	#use fast_count_segments
-	# cnt = naive_count_segments(starts, ends, points)
 	cnt = fast_count_segments(starts, ends, points)
 	for x in cnt:
 		print(x, end=' ')
