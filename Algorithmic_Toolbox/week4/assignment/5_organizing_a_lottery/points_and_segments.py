@@ -29,18 +29,19 @@ def sort_array(array, left, right):
 
 def mod_binary_search(a, x, left, right):
 	if right <= left:
-		return left
-	mid = left + ((right - left) // 2)
+		return left - 1
+	mid = left + (right - left) // 2
 	if x == a[mid]:
-		return mid + 1
+		return mod_binary_search(a, x, left, mid)
 	elif x < a[mid]:
-		if right - left == 1: return left - 1
-		right = mid
-		return mod_binary_search(a, x, left, right)
-	elif x > a[mid]:
-		if right - left == 1: return left + 1
-		left = mid
-		return mod_binary_search(a, x, left, right)
+		return mod_binary_search(a, x, left, mid)
+	else:
+		return mod_binary_search(a, x, mid + 1, right)
+
+def check_tail(idx, array, p):
+	while idx + 1 < len(array) and array[idx + 1] == p:
+		idx += 1
+	return idx
 
 def fast_count_segments(starts, ends, points):
 	cnt = [0] * len(points)	
@@ -50,25 +51,10 @@ def fast_count_segments(starts, ends, points):
 	ends_sorted = sort_array(ends, 0, len(ends))
 	# step3: modified binary search for points (n log m)
 	for index, point in enumerate(points):
-		dummy = 0
-
-		# print('starts={},ends={},point={}'.format(starts, ends, point))
 		start_idx = mod_binary_search(starts_sorted, point, 0, len(starts_sorted))
 		end_idx = mod_binary_search(ends_sorted, point, 0, len(ends_sorted))
-		
-		# print('start_idx={},end_idx={}'.format(start_idx, end_idx))
-		if start_idx == end_idx and start_idx != -1:
-			while end_idx != 0:
-				if ends_sorted[end_idx - 1] == point:
-					dummy += 1
-				end_idx -= 1
-			cnt[index] = dummy
-		elif start_idx == end_idx and start_idx == -1:
-			cnt[index] = 0
-		elif start_idx > end_idx:
-			cnt[index] = len(starts_sorted[:start_idx])
-		else:
-			cnt[index] = len(ends_sorted[:end_idx])
+		start_idx = check_tail(start_idx, starts_sorted, point)
+		cnt[index] = start_idx - end_idx
 	return cnt
 
 def naive_count_segments(starts, ends, points):
