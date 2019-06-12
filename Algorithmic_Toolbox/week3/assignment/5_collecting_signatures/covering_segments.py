@@ -4,41 +4,18 @@ from collections import namedtuple
 
 Segment = namedtuple('Segment', 'start end')
 
-def in_list(list_, list_points):
-	flag = False
-	for each in list_:
-		if each in list_points:
-			flag = True
-	return flag
-
-
-def optimal_points(segments):
-	points = []
-	segments = sorted(segments, key=lambda x: x.end)
-
-	segments.append(segments[-1])
-
-	for i in range(1, len(segments)): #len(segments)
-		current_s = segments[i]
-		prev_s = segments[i-1]
-		current_range = list(range(current_s.start, current_s.end+1))
-		prev_range = list(range(prev_s.start, prev_s.end+1))
-
-		print(current_range)
-
-		if in_list(prev_range, points):
-		    continue
-		union = list(set(prev_range) & set(current_range))
-		print('{}-{} >> union: {}, points: {}'.format(prev_range, current_range, union, points))
-		if union != []:
-			union.sort()
-			points.append(union[-1])
+def optimal_points(s):
+	p = []
+	s = sorted(s, key=lambda x: x.end)
+	for i in range(0, len(s)):
+		if i == 0:
+			p.append(s[i].end)
 		else:
-			if prev_range[-1] not in points:
-				points.append(prev_range[-1])
-			if current_range[-1] not in points:
-				points.append(current_range[-1])
-	return points
+			if s[i].start <= p[-1] and s[i].end >= p[-1]:
+				continue
+			else:
+				p.append(s[i].end)
+	return p
 
 if __name__ == '__main__':
 	input = sys.stdin.read()
