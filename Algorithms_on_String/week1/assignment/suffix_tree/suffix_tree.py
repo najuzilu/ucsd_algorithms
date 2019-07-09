@@ -11,10 +11,59 @@ def suffix_array(text):
 	return array
 
 def build_tree(patterns, main_text):
+	tree = {}
+	iter_ = 0 # keep track of nodes
+	dummy = False # to break out of outer loop after breaking inner loop
+
+	for i in range(len(patterns) - 5): ### TESTING FILE 3
+		element = patterns[i]
+		print('i = {}, Adding pattern `{}` in tree {}'.format(i, element, tree))
+		if i == 0:
+			tree[iter_] = {iter_ + 1: [i, len(element)]}
+			iter_ += 1
+		else:
+			node_idx = 0
+			for j in range(len(element)):
+				string = element[j]
+				for k, v in tree[node_idx].items():
+					text = main_text[v[0]: v[-1]]
+					print('Element={}; text from tree is={}'.format(element, text))
+					if string != text[j]:
+						print('String={} != {}=text[j] from tree'.format(string, text[j]))
+						if node_idx == 0:
+							print('>> on root node')
+							iter_ += 1
+							tree[node_idx][iter_] = [i, len(element)]
+							dummy = True
+							break
+						else:
+							print('>> not on root... node_idx={}, j={}, k={}, v={}, iter_={}, TREE={}'.format(node_idx,j, k, v, iter_, tree))
+							# tree[node_idx] = {iter_ + 1: [tree[node_idx][0], len]}
+							# tree[k] = {iter_ + 1: []}
+							# tree[k] = {iter_ + 1: [j, tree[node_idx - 1][node_idx][1]]} # append new node copied
+							# iter_ += 1
+							# print('>>>> node_idx={}, iter_={}, TREE={}'.format(node_idx, iter_, tree))
+							# tree[node_idx][iter_ + 1] = [j, len(element)]
+							# tree[node_idx - 1][node_idx][1] = j
+							dummy = True
+							break
+					else:
+						print('Strings are the same so updating node_idx to key=', k)
+						node_idx = k
+				if dummy == True:
+					print('______BREAKING____')
+					break
+		print('\n')
+	# tree[iter_] = {}
+	print(tree)
+	return tree
+
+'''
+def build_tree(patterns, main_text):
 	dummy = False # dummy to break out of outer loop
 	tree = {}
 	iter_ = 0
-	for i in range(len(patterns) - 4):
+	for i in range(len(patterns) - 5):
 		element = patterns[i]
 		print('Adding pattern `{}` in tree... {}'.format(element, tree))
 		node_idx = 0
@@ -46,10 +95,10 @@ def build_tree(patterns, main_text):
 				if dummy == True:
 					print('______BREAKING____')
 					break
-		print('\n')
 	# tree[iter_] = {}
 	print(tree)
 	return tree
+'''
 
 def build_suffix_tree(text):
 	"""
@@ -60,12 +109,11 @@ def build_suffix_tree(text):
 	result = []
 	print('TEXT = ', text)
 	suffixes = suffix_array(text)
-	print('SUFFIXIES: ', suffixes)
+	print('SUFFIXIES: ', suffixes, '\n')
 	
-	# suffixes_trie = build_trie(suffixes)
-	# print(suffixes_trie)
-
-	build_tree(suffixes, text)
+	# Build tree from scratch
+	tree = build_tree(suffixes, text)
+	# Traverse the tree and print nodes
 
 	
 
