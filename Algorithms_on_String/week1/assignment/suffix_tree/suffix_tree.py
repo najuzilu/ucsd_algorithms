@@ -10,95 +10,70 @@ def suffix_array(text):
 		text = ''.join(text)
 	return array
 
+def match_from_root(tree, node_idx, string, main_text):
+	for key, value in tree[node_idx].items():
+		if string == main_text[value[0]]:
+			return key
+	return False
+
 def build_tree(patterns, main_text):
 	tree = {}
-	iter_ = 0 # keep track of nodes
-	dummy = False # to break out of outer loop after breaking inner loop
+	iter_ = 1 # keep track of nodes
+	new_node_idx = 0 # keep track of new node
+	count = 0
 
-	for i in range(len(patterns) - 5): ### TESTING FILE 3
+	for i in range(len(patterns)): # TESTING # 3
 		element = patterns[i]
-		print('i = {}, Adding pattern `{}` in tree {}'.format(i, element, tree))
-		if i == 0:
-			tree[iter_] = {iter_ + 1: [i, len(element)]}
+		node_idx = 0 # current node index
+		count = 0 # to count how many same strings
+		print('Looping through pattern: ', element)
+		if i == 0: # if first element
+			tree[node_idx] = {iter_: [i, len(element)]}
 			iter_ += 1
 		else:
-			node_idx = 0
 			for j in range(len(element)):
 				string = element[j]
-				for k, v in tree[node_idx].items():
-					text = main_text[v[0]: v[-1]]
-					print('Element={}; text from tree is={}'.format(element, text))
-					if string != text[j]:
-						print('String={} != {}=text[j] from tree'.format(string, text[j]))
-						if node_idx == 0:
-							print('>> on root node')
-							iter_ += 1
-							tree[node_idx][iter_] = [i, len(element)]
-							dummy = True
-							break
-						else:
-							print('>> not on root... node_idx={}, j={}, k={}, v={}, iter_={}, TREE={}'.format(node_idx,j, k, v, iter_, tree))
-							# tree[node_idx] = {iter_ + 1: [tree[node_idx][0], len]}
-							# tree[k] = {iter_ + 1: []}
-							# tree[k] = {iter_ + 1: [j, tree[node_idx - 1][node_idx][1]]} # append new node copied
-							# iter_ += 1
-							# print('>>>> node_idx={}, iter_={}, TREE={}'.format(node_idx, iter_, tree))
-							# tree[node_idx][iter_ + 1] = [j, len(element)]
-							# tree[node_idx - 1][node_idx][1] = j
-							dummy = True
-							break
+				if j == 0: # find if first string of element is in one of the children from the root
+					print('Finding if first string matches with any nodes...')
+					new_node_idx = match_from_root(tree, node_idx, string, main_text)
+					if not new_node_idx:
+						print('First string did not match with any nodes')
+						tree[node_idx][iter_] = [i, len(element)]
+						iter_ += 1
+						break # first string does not match with any of the children from the root node so break loop of element and continue to next pattern
+					else: count += 1
+				else:
+					start_idx, length = tree[node_idx][new_node_idx][0], tree[node_idx][new_node_idx][1]
+					if j > length:
+						print('****Element={} has greater length than node_word={}'.format(element, main_text[start_idx:length]))
 					else:
-						print('Strings are the same so updating node_idx to key=', k)
-						node_idx = k
-				if dummy == True:
-					print('______BREAKING____')
-					break
-		print('\n')
-	# tree[iter_] = {}
-	print(tree)
+						if string == main_text[start_idx + j]:
+							count += 1
+						else:
+							print('BREAK NODE>>>')
+							if new_node_idx in tree.keys():
+								# if node already exists, split
+								print('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>')
+								print('node_idx={}, new_node_idx={}, iter_={}, count={}, j={}'.format(node_idx, new_node_idx, iter_, count, j))
+								# create new branch linked to iter_
+								
+								# tree[iter_] = tree[new_node_idx]
+								# tree[node_idx][new_node_idx][1] = count
+								# tree[new_node_idx] = {iter_: [j, len(element) - j - count]}
+								# iter_ += 1
+								# tree[new_node_idx][iter_] = [i + j, len(element) - j] ### ?????? not entirely sure about i + j
+								break
+							else:
+								# node does not exist so create one
+								tree[new_node_idx] = {iter_: [j, tree[node_idx][new_node_idx][1] - j]} # creates new branch with first node being filled by the main node being split
+								iter_ += 1
+								tree[new_node_idx][iter_] = [j + i, len(element) - j] # create new node on the same branch as above
+								tree[node_idx][new_node_idx][1] = j
+								break
+		print(tree)
+		print('\n')	
 	return tree
 
-'''
-def build_tree(patterns, main_text):
-	dummy = False # dummy to break out of outer loop
-	tree = {}
-	iter_ = 0
-	for i in range(len(patterns) - 5):
-		element = patterns[i]
-		print('Adding pattern `{}` in tree... {}'.format(element, tree))
-		node_idx = 0
-		if i == 0: # if in first iteration add to tree
-			tree[iter_] = {iter_ + 1: [i, len(element)]}
-			iter_ += 1
-		else:
-			for key,value in tree[node_idx].items(): # change to while true
-				text = main_text[value[0]: value[-1]]
-				for j in range(len(element)):
-					string = element[j]
-					print('Element is={}, text from tree is={}'.format(element, text))
-					if string != text[j]:
-						print('String={} != {}=text[j] from tree'.format(string, text[j]))
-						if node_idx == 0:
-							iter_ += 1
-							tree[node_idx][iter_] = [i, len(element)]
-							dummy = True
-							break
-						else:
-							print('Strings are not the same but not current node; current_node={}; key={}; j={}; iter_={}'.format(node_idx, key, j, iter_))
-							tree[key] = {iter_ + 1: [j, tree[node_idx - 1][node_idx][1]]}
-							iter_ += 1
-							tree[node_idx][iter_ + 1] = [j, len(element)]
-							tree[node_idx - 1][node_idx][1] = j
-							break
-					else:
-						node_idx = key
-				if dummy == True:
-					print('______BREAKING____')
-					break
-	# tree[iter_] = {}
-	print(tree)
-	return tree
-'''
 
 def build_suffix_tree(text):
 	"""
@@ -112,8 +87,11 @@ def build_suffix_tree(text):
 	print('SUFFIXIES: ', suffixes, '\n')
 	
 	# Build tree from scratch
-	tree = build_tree(suffixes, text)
-	# Traverse the tree and print nodes
+	patterns =  ['AAAATG$', 'AAATG$', 'AATG$'] 
+	build_tree(patterns, patterns[0])
+
+	# build_tree(suffixes, text)
+		
 
 	
 
