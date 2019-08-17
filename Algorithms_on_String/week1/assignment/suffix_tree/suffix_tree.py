@@ -31,12 +31,20 @@ def suffix_tree(text):
 						start_idx, length = cur_info[0], cur_info[1]
 						count -= 1
 			if cur in tree.keys():
+				if count <= length:
+					tree[iter_ + 1] = tree[cur]
+					inf_list[iter_] = [inf_list[cur - 1][0] + count, length] # is wrong count, length
+					# tree[cur][text[start_idx]] = iter_ + 1
+					tree[cur] = {text[start_idx] : iter_ + 1}
+					inf_list[cur - 1][1] = count
+					iter_ += 1
 				# update tree with new node
 				tree[cur][text[j]] = iter_ + 1
 				inf_list[iter_] = [j, length_cst - j]
 				iter_ += 1
 			else:
 				# update inf_list with the new node with parent node information
+				print('>>> ', inf_list[cur - 1][0], count, text[inf_list[cur - 1][0]:inf_list[cur - 1][0]+count])
 				inf_list[iter_] = [inf_list[cur - 1][0] + count, inf_list[cur - 1][1] - count]
 				# update inf_list parent node
 				inf_list[cur - 1][1] = count
@@ -53,6 +61,10 @@ def suffix_tree(text):
 			tree[cur][text[i]] = iter_ + 1
 			inf_list[iter_] = [i, len(text) - i]
 			iter_ += 1
+		print('i =', i)
+		print('tree =', tree)
+		print('inf_list =', inf_list)
+		print('\n')
 	return tree, inf_list
 
 def build_suffix_tree(text):
