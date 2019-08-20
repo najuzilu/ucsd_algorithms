@@ -81,7 +81,7 @@ def build_suffix_tree(text):
 			start_index = text_range[0]
 			text_len = text_range[1]
 			results.append(text[start_index: start_index + text_len])
-	return results
+	return sorted(results)
 
 if __name__ == '__main__':
 	text = sys.stdin.readline().strip()
