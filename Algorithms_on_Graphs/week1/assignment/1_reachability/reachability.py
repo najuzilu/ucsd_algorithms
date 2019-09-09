@@ -2,23 +2,21 @@
 
 import sys
 
-def reach(adj, x, y):
-	#write your code here
-	print('{}, {}-{}'.format(adj, x, y))
-	for i in range(len(adj)):
-		try:
-			adj[i][1]
-			print('i ={}, adj[0]={}, adj[1]={}'.format(i, adj[i][0], adj[i][1]))
-			continue
-		except IndexError:
-			pass
-		try:
-			adj[i][0]
-			print('i ={}, adj[0]={}'.format(i, adj[i][0]))
-			continue
-		except IndexError:
-			pass
-	return 0
+def reach(adj, x, y, disc):
+	disc.append(x)
+	count = 0 # count paths
+	for node in adj[x]:
+		# print('looping through node', node)
+		if node == y:
+			count += 1
+		else:
+			# not y
+			if node in disc:
+				pass
+			else:
+				disc.append(node)
+				count += reach(adj, node, y, disc)
+	return count
 
 if __name__ == '__main__':
 	input = sys.stdin.read()
@@ -32,4 +30,9 @@ if __name__ == '__main__':
 	for (a, b) in edges:
 		adj[a - 1].append(b - 1)
 		adj[b - 1].append(a - 1)
-	print(reach(adj, x, y))
+	discovered_nodes = []
+	no_paths = reach(adj, x, y, discovered_nodes)
+	if no_paths == 0:
+		print(no_paths)
+	else:
+		print(1)
