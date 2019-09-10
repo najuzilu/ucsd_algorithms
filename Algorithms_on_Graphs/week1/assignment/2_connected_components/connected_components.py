@@ -2,11 +2,27 @@
 
 import sys
 
+def explore(v, visited, cc_coef):
+	visited[v] = True
+	if cc_coef not in cc_array:
+		cc_array.append(cc_coef)
+	for node in adj[v]:
+		if visited[node] == False:
+			explore(node, visited, cc_coef)
+
 
 def number_of_components(adj):
-	result = 0
-	#write your code here
-	return result
+	global cc_array
+	cc_array = [] # connected component array
+
+	visited = [False for _ in range(len(adj))]
+	cc_coef = 1 # connected compononent number
+	for i in range(len(adj)):
+		if visited[i] == False:
+			explore(i, visited, cc_coef)
+			cc_coef += 1
+	return len(cc_array)
+
 
 if __name__ == '__main__':
 	input = sys.stdin.read()
