@@ -4,15 +4,10 @@ import sys
 
 def explore(node, visited, previous):
 	visited[node] = True
-
 	for child in adj[node]:
 		if visited[child] == False:
-			explore(child, visited, previous)
-
+			explore(child, visited, node)
 	ranked.insert(0, node)
-	if adj[node] == []:
-		if previous != node:
-			adj[previous].remove(node)
 
 def DFS(g):
 	visited = [False for _ in range(len(adj))]
@@ -25,7 +20,6 @@ def toposort(adj):
 	ranked = []
 	DFS(adj)
 	return ranked
-
 
 if __name__ == '__main__':
 	input = sys.stdin.read()
