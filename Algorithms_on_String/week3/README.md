@@ -13,6 +13,6 @@ What is the maximum amount by which you can shift the Pattern to the right witho
 **Answer**: [0, 0, 1, 0, 1, 2, 3, 4, 5, 6, 7, 2, 3]
 
 4. What is the total number of times that the condition of the while loop will be checked in this pseudocode for ComputePrefixFunction if we call it for the string ACATACATACACA?  
-**Answer**: 12,13, 14, **answer**:15
+**Answer**: 15
 
 
