@@ -2,31 +2,18 @@
 
 import sys
 import queue
-import heapq
-from heapq import heappush, heappop
 
-"""
-1) when the root is in a negative cycle and 2) when the root is reachable from a negative cycle. 
-Remark: It is also necessary to exclude vertices to which lead the edges from the negative loop.
-
-There are some ideas for code optimisation:
-1. Process only those vertices (and associated edges) whose distances have been changed after relaxing.
-2. Check for negative loops not at the end of the program, but during processing of the next vertex/edge. If there is a negative loop, then we exclude all loop-related vertices.
-
-Use float('inf') instead of 10**19 (if you're using other languages make sure to change this as well)
-Assign reachable[source] to 1
-Relax all possible edge on V-1 iterations. If a node is relaxable, assign reachable[node] to 1
-On Vth iteration, if a node is relaxable, put it in the queue (if it's not in the queue already), and note that you don't need to update the distance of that node either.
-Run BFS for each nodes in the queue, after a node is taken out, you do some stuff with it (visited[node] = True, shortest[node] = 0 etc,.).
-No need for v = parent[v], this solution still works like a charm.
-"""
+def explore(v, g, visited, reach):
+	visited[v] = True
+	reach[v] = 1
+	for n in g[v]:
+		if visited[n] == False:
+			explore(n, g, visited, reach)
+	return reach
 
 def negative_cycle(g, c, distance, s):
 	L = []
-
 	distance[s] = 0
-
-	copyDistance = distance[:] # copy distance
 	for iter_ in range(len(g)):
 		for i in range(len(g)):
 			for j in range(len(g[i])):
@@ -34,63 +21,54 @@ def negative_cycle(g, c, distance, s):
 				costVal = c[i][j]
 				if distance[nodeVal] > distance[i] + costVal:
 					distance[nodeVal] = distance[i] + costVal
-					### if in last iteration of verticies, then any negative node cycles append to heapq
+					### if in last iteration of verticies, 
+					### then any negative node cycles append to heapq
 					if iter_ == len(g) - 1:
-						heapq.heappush(L, nodeVal)
-		### stop loop earlier if distance array has not been updated
-		if distance == copyDistance:
-			return L, distance
-		copyDistance = distance[:]
+						L.append(nodeVal)
 	return L, distance
 
-def shortet_paths(adj, cost, s, distance, reachable, shortest):
+def exploreNeg(v, g, visited):
+	visited[v] = True
+	shortest[v] = 0
+	distance[v] = - float("inf")
+	for n in g[v]:
+		# print('v={}, shortest[v]={}, distance[v]={}, shortest[n]={}, distance[n]={}'.format(v, shortest[v], distance[v], shortest[n], distance[n]))
+		if visited[n] == False:
+			exploreNeg(n, g, visited)
 
+def shortet_paths(adj, cost, s, distance, reachable, shortest):
+	### Step 1: vector named component to restore all connected
+	### vertices explored from source s, and a function to get 
+	### these elements. This vector contains the order information, 
+	### which is significant for next moves.
+
+	visited = [False for _ in range(len(adj))]
+	reachable = explore(s, adj, visited, reachable)
+
+	### Step 2: Do V-1 times B-F algorithm, from now on, there 
+	### will be some changes if one vertex is in a negative cycle.
 	Q, distance = negative_cycle(adj, cost, distance, s)
 
-	### Loop through negative cycles
+	### Step 3: 2 iterations based on the component order, 
+	### look up all vertices in component, do relax function, 
+	### but this time let the distance equals to -INF
+
+	visitedNeg = [False for _ in range(len(adj))]
+	for q in Q:
+		if visitedNeg[q] == False:
+			exploreNeg(q, adj, visitedNeg)
+
+	distance[s] = 0
 	# while Q:
-	# 	dequeue_node = heapq.heappop(Q)
-	# 	distance[dequeue_node] = -(10**19)
+	# 	dequeue_node = Q.pop(0)
 	# 	shortest[dequeue_node] = 0
-	# 	for child in adj[dequeue_node]:
-	# 		if distance[child] > -(10**19):
-	# 			heapq.heappush(Q, child)
+	# 	for i in range(len(adj[dequeue_node])):
+	# 		child = adj[dequeue_node][i]
+	# 		if distance[child] > distance[dequeue_node] + cost[dequeue_node][i]:
+	# 			distance[child] = -(float("inf"))
+	# 			# shortest[child] = 0
+	# 			Q.append(child)
 
-	# ### Loop through visited path
-	L = []
-	heapq.heappush(L, s)
-	reachable[s] = 1
-	visited = [False for _ in range(len(adj))]
-
-	while L:
-		dequeue_node = heapq.heappop(L)
-		### is negative cycle?
-		# print('dequeue_node ', dequeue_node)
-		if dequeue_node in Q:
-			# print('    >>>dequeue_node {} in cycle. distance[dequeue_node]={} shortest[dequeue_node]={}'.format(dequeue_node, distance[dequeue_node], shortest[dequeue_node]))
-		
-			if distance[dequeue_node] > -(10**19):
-				distance[dequeue_node] = -(10**19)
-				shortest[dequeue_node] = 0
-			# print('    >>>dequeue_node {} in cycle. distance[dequeue_node]={} shortest[dequeue_node]={}'.format(dequeue_node, distance[dequeue_node], shortest[dequeue_node]))
-
-		visited[dequeue_node] = True
-		
-		for i in range(len(adj[dequeue_node])):
-			child = adj[dequeue_node][i]
-			# print('looping through child =', child)
-			
-			if distance[child] > distance[dequeue_node] + cost[dequeue_node][i]:
-				distance[child] = distance[dequeue_node] + cost[dequeue_node][i]
-				shortest[child] = 0
-			if visited[child] == False:
-				heapq.heappush(L, child)
-				reachable[child] = 1
-		# print('\n')
-
-	# print('final distance =', distance)
-	# print('final reachable =', reachable)
-	# print('final shortest =', shortest)
 
 if __name__ == '__main__':
 	input = sys.stdin.read()
@@ -106,7 +84,8 @@ if __name__ == '__main__':
 		cost[a - 1].append(w)
 	s = data[0]
 	s -= 1
-	distance = [10**19] * n
+	# distance = [10**19] * n
+	distance = [float("inf")] * n
 	reachable = [0] * n
 	shortest = [1] * n
 	shortet_paths(adj, cost, s, distance, reachable, shortest)
@@ -117,4 +96,3 @@ if __name__ == '__main__':
 			print('-')
 		else:
 			print(distance[x])
-
