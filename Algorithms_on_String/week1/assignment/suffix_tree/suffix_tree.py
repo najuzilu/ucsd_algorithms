@@ -1,87 +1,188 @@
 # python3
 import sys
+import collections
 
-def suffix_tree(text):
-	tree = {} 
-	iter_ = 0 # to keep track # of nodes
+def sort_characters(s):
+	alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+	order = [None for _ in range(len(s))]
+	count = [0 for _ in range(len(alphabet))]
 	
-	inf_list = [ [None, None] for _ in range(len(text) * 2)] # list to store [start_idx, length] for each node
-	inf_list[iter_] = [0, len(text)] # 1st node info > add all text
-	tree[iter_] = {text[0] : iter_ + 1} # 1st node in tree
-	iter_ += 1
-	length_cst = len(text) # length of text constant
+	dict_map = {}
+	for i in range(len(s)):
+		if s[i] == '$':
+			idx = ord('$') - ord('$')
+		else:
+			idx = ord(s[i]) - ord('A') + 1
 
-	for i in range(1, len(text)):
-		cur = 0 # set current node to root node for each iter of text
-		count = 0 # count # of same letters
-		if text[i] in tree[cur].keys(): # if first letter in root
-			cur = tree[cur][text[i]] # find node after root
-			cur_info = inf_list[cur - 1] # subtract one because inf_list starts index 0
-			start_idx, length = cur_info[0], cur_info[1]
-			j = i
-			while text[j] == text[start_idx]:
-				count += 1
-				start_idx += 1
-				j += 1
-				length -= 1
-				if length == 0:
-					if text[j] in tree[cur].keys():
-						cur = tree[cur][text[j]] # find node after root
-						cur_info = inf_list[cur - 1] # subtract one because inf_list starts index 0
-						start_idx, length = cur_info[0], cur_info[1]
-						count -= 1
-			if cur in tree.keys():
-				if count < inf_list[cur - 1][1]:
-					tree[iter_ + 1] = tree[cur]
-					inf_list[iter_] = [inf_list[cur - 1][0] + count, length]
-					tree[cur] = {text[start_idx] : iter_ + 1}
-					inf_list[cur - 1][1] = count
-					iter_ += 1
-				# update tree with new node
-				tree[cur][text[j]] = iter_ + 1
-				inf_list[iter_] = [j, length_cst - j]
-				iter_ += 1
-			else:
-				# update inf_list with the new node with parent node information
-				x = inf_list[cur - 1][0] + count
-				inf_list[iter_] = [x, length_cst - x]
-				# update inf_list parent node
-				inf_list[cur - 1][1] = count
-				# create the new node from the parent node info
-				tree[cur] = {text[start_idx] : iter_ + 1}
-				iter_ += 1
+		if s[i] not in dict_map.keys():
+			dict_map[s[i]] = idx
+		count[idx] += 1
+	for j in range(1, len(alphabet)):
+		count[j] = count[j] + count[j - 1]
+	for i in range(len(s) - 1, -1, -1):
+		c = s[i]
+		count[dict_map[c]] = count[dict_map[c]] - 1
+		order[count[dict_map[c]]] = i
+	return order
 
-				# update inf_list with the new branch
-				inf_list[iter_] = [j, length_cst - j]
-				# create the new node from the parent node info
-				tree[cur][text[j]] = iter_ + 1
-				iter_ += 1
-		else: # if first letter not in root
-			tree[cur][text[i]] = iter_ + 1
-			inf_list[iter_] = [i, len(text) - i]
-			iter_ += 1
-		# print('i =', i)
-		# print('tree =', tree)
-		# print('inf_list =', inf_list)
-		# print('\n')
-	return tree, inf_list
+def compute_char_classes(s, order):
+	class_array = [None for _ in range(len(s))]
+	class_array[order[0]] = 0
+
+	for i in range(1, len(s)):
+		if s[order[i]] != s[order[i-1]]:
+			class_array[order[i]] = class_array[order[i-1]] + 1
+		else:
+			class_array[order[i]] = class_array[order[i-1]]
+	return class_array
+
+def sort_doubled(s, L, order, class_array):
+	count = [0 for _ in range(len(s))]
+	newOrder = [None for _ in range(len(s))]
+
+	for i in range(0, len(s)):
+		count[class_array[i]] += 1
+
+	for j in range(1, len(s)):
+		count[j] = count[j] + count[j-1]
+	for i in range(len(s)-1, -1, -1):
+		start = (order[i] - L + len(s)) % len(s)
+		cl = class_array[start]
+		count[cl] -= 1
+		newOrder[count[cl]] = start
+	return newOrder
+
+def update_classes(order, class_array, L):
+	n = len(order)
+	new_class = [None for _ in range(n)]
+	new_class[order[0]] = 0
+
+	for i in range(1, n):
+		cur = order[i]
+		prev = order[i-1]
+		mid = (cur + L) % n
+		mid_prev = (prev + L) % n
+
+		if class_array[cur] != class_array[prev] or class_array[mid] != class_array[mid_prev]:
+			new_class[cur] = new_class[prev] + 1
+		else:
+			new_class[cur] = new_class[prev]
+	return new_class
+
+def build_suffix_array(text):
+	order = sort_characters(text)
+	class_array = compute_char_classes(text, order)
+	L = 1
+
+	while L < len(text):
+		order = sort_doubled(text, L, order, class_array)
+		class_array = update_classes(order, class_array, L)
+		L *= 2
+
+	return order
+
+def lcp_of_suffixes(s, i, j, equal):
+	lcp = max(0, equal)
+	while (i + lcp < len(s)) and (j + lcp < len(s)):
+		if s[i +lcp] == s[j + lcp]:
+			lcp += 1
+		else:
+			break
+	return lcp
+
+def invert_suffix_array(order):
+	pos = [None for _ in range(len(order))]
+	for i in range(0, len(pos)):
+		pos[order[i]] = i
+	return pos
+
+def compute_lcp_array(s, order):
+	lcp_array = [None for _ in range(len(s) - 1)]
+	lcp = 0
+
+	pos_in_order = invert_suffix_array(order)
+	suffix = order[0] # could be order[1]
+
+	for i in range(len(s)):
+		order_idx = pos_in_order[suffix]
+		if order_idx == len(s) - 1:
+			lcp = 0
+			suffix = (suffix + 1) % len(s)
+			continue
+		next_suffix = order[order_idx + 1]
+		lcp = lcp_of_suffixes(s, suffix, next_suffix, lcp-1)
+		lcp_array[order_idx] = lcp
+		suffix = (suffix + 1) % len(s)
+	return lcp_array
+
+class suffix_tree_node(object):
+	def __init__(self, children, parent, string_depth, edge_start, edge_end):
+		self.children = collections.OrderedDict(children)
+		self.parent = parent
+		self.string_depth = string_depth
+		self.edge_start = edge_start
+		self.edge_end = edge_end
+
+def create_new_leaf(node, s, suffix):
+	leaf = suffix_tree_node({}, node, len(s) - suffix, suffix + node.string_depth, len(s))
+	node.children[s[leaf.edge_start]] = leaf
+	return leaf
+
+def break_edge(node, s, start, offset, suffix):
+	start_char = s[start]
+	mid_char = s[start + offset]
+
+	# Node that is split
+	mid_node = suffix_tree_node({}, node, node.string_depth + offset, start, start + offset)
+
+	# Add left over from split to split node => add node '$' to node 'A'
+	mid_node.children[mid_char] = node.children[start_char] 
+	
+	# Modifies leaf from split which is correct
+	node.children[start_char].parent = mid_node
+	node.children[start_char].edge_start += offset
+	node.children[start_char] = mid_node
+	return mid_node
+
+def suffix_array_to_suffix_tree(sa, lcp, text):
+	root = suffix_tree_node({}, None, 0, -1, -1)
+	lcp_prev = 0
+	cur_node = root
+
+	for i in range(len(text)):
+		suffix = sa[i]
+
+		while cur_node.string_depth > lcp_prev:
+			cur_node = cur_node.parent
+
+		if cur_node.string_depth == lcp_prev:
+			cur_node = create_new_leaf(cur_node, text, suffix)
+		else:
+			edge_start = sa[i-1] + cur_node.string_depth
+			offset = lcp_prev - cur_node.string_depth
+			mid_node = break_edge(cur_node, text, edge_start, offset, suffix)
+			cur_node = create_new_leaf(mid_node, text, suffix)
+
+		if i < len(text)-1:
+			lcp_prev = lcp[i]
+	return root
 
 def build_suffix_tree(text):
-	"""
-	Build a suffix tree of the string text and return a list
-	with all of the labels of its edges (the corresponding 
-	substrings of the text) in any order.
-	"""
-	results = []
-	tree, suffix_tree_inf = suffix_tree(text)
+	result = []
+	sa = build_suffix_array(text)
+	lcp = compute_lcp_array(text, sa)
+	tree = suffix_array_to_suffix_tree(sa, lcp, text)
 
-	for node in tree:
-		for c in tree[node]:
-			text_range = suffix_tree_inf[tree[node][c] - 1]
-			start_index = text_range[0]
-			text_len = text_range[1]
-			results.append(text[start_index: start_index + text_len])
-	return sorted(results)
+	stack = [tree]
+
+	while len(stack) > 0:
+		node = stack[-1]
+		stack.pop()
+		if node.edge_start != -1 and node.edge_end != -1:
+			result.append(text[node.edge_start: node.edge_end])
+		for j in range(len(node.children)-1, -1, -1): # in reverse order
+			stack.append(list(node.children.values())[j])
+	return result
 
 if __name__ == '__main__':
 	text = sys.stdin.readline().strip()
