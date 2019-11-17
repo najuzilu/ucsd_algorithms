@@ -1,21 +1,7 @@
 # python3
 import sys
 import collections
-"""
-I used the hint in the problem description, i.e., construct suffix tree of TEXT1#TEXT2$.
 
-Then you will find that the leaves whose path start from TEXT1 always contain # sign (type L leaf). 
-And those don't contain # sign and ending with $ sign are leaves whose path starts from TEXT2 (type R leaf).
-
-The next step is to check every type L leaf. A candidate answer would be the path + the first letter of type 
-L leaf (except for the case that type L leaf starts with #), because we are not sure whether the path is shared 
-with some type R leaves, by adding the first letter of the current type L leaf we can make sure the substring is 
-not shared by any type R leaf (an exception in next paragraph). Then you just have to select the shortest candidate.
-
-However, note that if a non-leaf node has type L leaves only, it means that the candidate answer would be only the 
-path ending at the current non-leaf node instead of the path + the first letter of the left leaf. In this case, we 
-are sure that the path is shared by type L leaves only, thus there is no need to add an extra letter.
-"""
 def sort_characters(s):
 	alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ#'
 	order = [None for _ in range(len(s))]
@@ -184,7 +170,14 @@ def suffix_array_to_suffix_tree(sa, lcp, text):
 			lcp_prev = lcp[i]
 	return root
 
+
+
+
+
 """
+Then you will find that the leaves whose path start from TEXT1 always contain # sign (type L leaf). 
+And those don't contain # sign and ending with $ sign are leaves whose path starts from TEXT2 (type R leaf).
+
 The next step is to check every type L leaf. A candidate answer would be the path + the first letter of type 
 L leaf (except for the case that type L leaf starts with #), because we are not sure whether the path is shared 
 with some type R leaves, by adding the first letter of the current type L leaf we can make sure the substring is 
@@ -195,17 +188,42 @@ path ending at the current non-leaf node instead of the path + the first letter 
 are sure that the path is shared by type L leaves only, thus there is no need to add an extra letter.
 """
 
-def path_to(node, end_node, string, path = ''):
-	print(string[node.edge_start: node.edge_end])
-	path += string[node.edge_start: node.edge_end]
-	for child in node.children.values():
-		if child == end_node:
-			print('Found node!')
-			# return path
+
+def has_path(node, end_node, string):
+	"""
+		If node in path, it append to paths list
+	"""
+	global path
+
+	if node.edge_start != -1 and node.edge_end != -1:
+		if node.children == {}:
+			path += string[node.edge_start]
 		else:
-			path_to(child, string, path)
+			path += string[node.edge_start:node.edge_end]
+
+	if (node == end_node):
+		return True
+
+	for child in node.children.values():
+		if has_path(child, end_node, string):
+			return True
+
+	path = path[:-1]
+	return False
+
+def path_to(node, end_node, string):
+	"""
+		Calls has_path method
+	"""
+	global path
+	path = ''
+	if (has_path(node, end_node, string)):
+		return path
 
 def explore(node, string):
+	"""
+		Find all nodes that are part of text 1 and set mark to True
+	"""
 	mark_array = [False for _ in range(len(node.children))]
 	list_children = list(node.children.values())
 
@@ -214,7 +232,7 @@ def explore(node, string):
 		explore(child, string)
 		mark_array[i] = child.mark
 
-	if node.children == {} and '#' in string[node.edge_start:node.edge_end]: # if leaf
+	if (node.children == {}) and ('#' in string[node.edge_start:node.edge_end]): # if leaf
 		L_nodes.append(node)
 		node.mark = True
 
@@ -222,11 +240,10 @@ def explore(node, string):
 		L_nodes.append(node)
 		node.mark = True
 
+
 def solve (p, q):
-	result = []
 	# Construct suffix tree of TEXT1#TEXT2$
 	text = p + '#' + q + '$'
-	print("TEXT=", text)
 	sa = build_suffix_array(text)
 	lcp = compute_lcp_array(text, sa)
 	tree = suffix_array_to_suffix_tree(sa, lcp, text)
@@ -236,17 +253,21 @@ def solve (p, q):
 	L_nodes = []
 	explore(tree, text)
 
+	result = []
+
 	for l in L_nodes:
 		l_name = text[l.edge_start:l.edge_end]
-		if l.children == {} and l_name[0] != '#':
-			result.append(path_to(tree, l.parent, text) + l_name)
-		elif l.children != {}:
+		if len(l.children) == 0 and not l_name.startswith('#'):
+			# print('*', path_to(tree, l, text))
 			result.append(path_to(tree, l, text))
-	
-	return result
+		elif len(l.children) > 0:
+			# print(' ', path_to(tree, l, text))
+			result.append(path_to(tree, l, text))
+
+	return min(result, key=len)
 
 p = sys.stdin.readline ().strip ()
 q = sys.stdin.readline ().strip ()
 
 ans = solve (p, q)
-# sys.stdout.write (ans + '\n')
+sys.stdout.write (ans + '\n')
