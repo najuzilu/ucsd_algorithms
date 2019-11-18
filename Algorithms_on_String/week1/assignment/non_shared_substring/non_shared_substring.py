@@ -12,9 +12,9 @@ def sort_characters(s):
 		if s[i] == '$':
 			idx = ord('$') - ord('$')
 		elif s[i] == '#':
-			idx = len(alphabet) - 1
+			idx = ord('$') - ord('$') + 1
 		else:
-			idx = ord(s[i]) - ord('A') + 1
+			idx = ord(s[i]) - ord('A') + 2
 
 		if s[i] not in dict_map.keys():
 			dict_map[s[i]] = idx
@@ -189,56 +189,112 @@ are sure that the path is shared by type L leaves only, thus there is no need to
 """
 
 
-def has_path(node, end_node, string):
-	"""
-		If node in path, it append to paths list
-	"""
-	global path
+# def has_path(node, end_node, string):
+# 	"""
+# 		If node in path, it append to paths list
+# 	"""
+# 	global path
 
-	if node.edge_start != -1 and node.edge_end != -1:
-		if node.children == {}:
-			path += string[node.edge_start]
-		else:
-			path += string[node.edge_start:node.edge_end]
+# 	if node.edge_start != -1 and node.edge_end != -1:
+# 		path += string[node.edge_start:node.edge_end]
+# 		# if node.children == {}:
+# 		# 	path += string[node.edge_start]
+# 		# else:
+# 		# 	path += string[node.edge_start:node.edge_end]
 
-	if (node == end_node):
-		return True
+# 	if (node == end_node):
+# 		return True
 
-	for child in node.children.values():
-		if has_path(child, end_node, string):
-			return True
+# 	for child in node.children.values():
+# 		if has_path(child, end_node, string):
+# 			return True
 
-	path = path[:-1]
-	return False
+# 	path = path[:-1]
+# 	return False
 
-def path_to(node, end_node, string):
-	"""
-		Calls has_path method
-	"""
-	global path
+# def path_to(node, end_node, string):
+# 	"""
+# 		Calls has_path method
+# 	"""
+# 	global path
+# 	path = ''
+# 	if (has_path(node, end_node, string)):
+# 		return path
+
+# def explore(node, string):
+# 	"""
+# 		Find all nodes that are part of text 1 and set mark to True
+# 	"""
+# 	for child in node.children.values():
+# 		explore(child, string)
+
+# 	if node.children == {} and '#' in string[node.edge_start: node.edge_end]: #and not string[node.edge_start: node.edge_end].startswith('#')
+# 		node.mark = True
+# 		L_nodes.append(node)
+# 	else:
+# 		for child in node.children.values():
+# 			if child.mark == True:
+# 				node.mark = True
+# 				break
+
+def print_array(ints, len):
+	""" TESTING """
+	for i in ints[0: len]:
+		print(i, " ", end = "")
+	print()
+
+def append_path(ints, len):
 	path = ''
-	if (has_path(node, end_node, string)):
-		return path
+	for each in ints:
+		if each.startswith('#'):
+			return ''
+		elif '#' in each:
+			path += each[0]
+		else:
+			path += each
+	return path
 
 def explore(node, string):
 	"""
-		Find all nodes that are part of text 1 and set mark to True
+		Mark all nodes that have leaf children as True
 	"""
-	mark_array = [False for _ in range(len(node.children))]
-	list_children = list(node.children.values())
-
-	for i in range(len(list_children)):
-		child = list_children[i]
+	if '#' in string[node.edge_start: node.edge_end] and len(node.children) == 0:
+		node.mark = True
+	for child in node.children.values():
 		explore(child, string)
-		mark_array[i] = child.mark
 
-	if (node.children == {}) and ('#' in string[node.edge_start:node.edge_end]): # if leaf
-		L_nodes.append(node)
-		node.mark = True
+def explore2(node, string):
+	print(string[node.edge_start:node.edge_end], ' -> ',node.mark)
+	for child in node.children.values():
+		explore2(child, string)
 
-	if set(mark_array) == set([True]): # if leaf children are both true
-		L_nodes.append(node)
-		node.mark = True
+def print_paths_rec(node, path, string, pathLen):
+	global result
+
+	if (len(path) > pathLen):
+		path[pathLen] = string[node.edge_start: node.edge_end]
+	else:
+		path.append(string[node.edge_start: node.edge_end])
+	pathLen += 1
+
+	### checks if children are leaf L nodes
+	node_children = list(node.children.values())
+	array = [False for _ in range(len(node_children))]
+	for i in range(len(node_children)):
+		array[i] = node_children[i].mark
+	if False not in array and len(array) > 0:
+		n = string[node.edge_start: node.edge_end]
+		if n not in string[string.find('#'):]:
+			result.append(n)
+
+	if len(node.children) == 0:
+		if '#' in string[node.edge_start: node.edge_end]:
+			# print_array(path, pathLen)
+			concat_path = append_path(path[:pathLen], pathLen)
+			if concat_path != '': result.append(concat_path)
+	else:
+		for child in node.children.values():
+			print_paths_rec(child, path, string, pathLen)
 
 
 def solve (p, q):
@@ -247,22 +303,16 @@ def solve (p, q):
 	sa = build_suffix_array(text)
 	lcp = compute_lcp_array(text, sa)
 	tree = suffix_array_to_suffix_tree(sa, lcp, text)
-	
-	# Mark nodes in T with mark True in post order (using DFS)
-	global L_nodes
-	L_nodes = []
+
 	explore(tree, text)
 
-	result = []
+	global result
+	path, result = [], []
+	print_paths_rec(tree, path, text, 0)
 
-	for l in L_nodes:
-		l_name = text[l.edge_start:l.edge_end]
-		if len(l.children) == 0 and not l_name.startswith('#'):
-			# print('*', path_to(tree, l, text))
-			result.append(path_to(tree, l, text))
-		elif len(l.children) > 0:
-			# print(' ', path_to(tree, l, text))
-			result.append(path_to(tree, l, text))
+	# print("\n")
+	# for each in result:
+	# 	print(each)
 
 	return min(result, key=len)
 
