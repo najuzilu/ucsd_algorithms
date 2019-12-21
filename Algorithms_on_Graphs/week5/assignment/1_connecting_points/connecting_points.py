@@ -1,81 +1,49 @@
 #Uses python3
 import sys
 import math
-# from collections import OrderedDict
 
-"""
-1. use disjoint set data structures
-2. initially each vertex lies in a separate set
-3. each set is the set of vetices of a connected component
-4. to check whether the current edge {u, v} produces a cycle, we check whether u and v belong to the same set
+def union(u, v, set_dist):
+	v_index = find(v, set_dist)
+	u_index = find(u, set_dist)
 
-- disjoint sets: A   B   C   D   E   F
-- 1st lighest edge is A-E; we check to see if A or E lie in different connected components (findOf(A) and findOf(E)) >> add edge to current solution >> update data structure: A,E  B   C   D   F
-- next lightest edge is C-F: we check to see if C or F lie in different connected components (findOf(C) and findOf(F)) >> add edge to current solution >> update data structure (Union(C,F)): A,E  B   C,F  D
-- next lightest edge is A-D: we check to see if A or D lie in different connected components (findOf(A) and findOf(D)) >> add edge to current solution >> update data structure: A,E,D  B   C,F  D
-- next lightest edge is D-E: we check to see if D or E lie in different connected components (findOf(D) and findOf(E)) >> skip
-- next lightest edge is _-_: we check to see if _ or _ lie in different connected components (findOf(_) and findOf(_)) >> add edge to current solution >> update data structure: A,E  B   C,F  D
-...
+	for item in set_dist[v_index]:
+		set_dist[u_index].append(item)
 
-Kurskal(G):
-for all u in V:
-	MakeSet(v)
-X <- empty set
-sort the edges E by weight
-for all {u, v} in E in non decreasing weight order:
-	if Find(u) != Find(v):
-		add {u, v} to X
-		Union(u, v)
-return X
+	set_dist.pop(v_index)
+	return set_dist
 
-"""
+def find(u, set_dist):
+	for i in range(len(set_dist)):
+		if u in set_dist[i]:
+			return i
+	return -1
 
-def create_all_edges(x, y):
-	"""
-		Sort edges E by weight.
-	"""
-	dict_edges = {}
+def calculate_distances(x, y):
+	all_sets = []
 	for i in range(len(x)):
-		print('looping through x with i =', i)
-		dict_edges['{}{}'.format(x[i],y[i])] = math.sqrt(x[i]**2 + y[i]**2)
-	sorted_dict = sorted(dict_edges.items(), key=lambda kv: kv[1])
-	return sorted_dict
+		current_point = (x[i], y[i])
+		for j in range(i+1, len(x)): # skip where x[i],y[i] same as x[j],y[j]
+			distance = math.sqrt((x[i]-x[j])**2 + (y[i]-y[j])**2)
+			all_sets.append((distance,((x[i],y[i]),(x[j],y[j]))))
+	return all_sets
 
 def minimum_distance(x, y):
 	result = 0.0
-
-	i = 0
-	copy_edges = [(x[i], y[i]) for i in range(len(x))]
-	edges_exist = []
-
-	while len(copy_edges) > 1:
-		print('Total copy_edges = ' , copy_edges ,'\nlooping through current point: ', copy_edges[i])
-
-		# dict_edges needs to be reset at every iteration
-		dict_edges = {}
-		# add current location to dict_edges
-		edges_exist.append(copy_edges[i]) 			# removes edge distance 0 from comparison
+	disjoint_sets = [[(x[i], y[i])] for i in range(len(x))]
+	#  calculate all disjoin sets with distance
+	distances = calculate_distances(x, y)
+	# sort edges by distance
+	sorted_dist = sorted(distances, key = lambda x: x[0])
+	for pair in sorted_dist:
+		u = pair[1][0]
+		v = pair[1][1]
 		
-		# calculate distances from this point if they're not in edges_exist
-		for j in range(len(copy_edges)): # problem
-			if copy_edges[i] != copy_edges[j]: # distance is not 0 // copy_edges[j] not in edges_exist and 
-				dict_edges[copy_edges[j]] = math.sqrt( (copy_edges[i][0] - copy_edges[j][0])**2 + (copy_edges[i][1] - copy_edges[j][1])**2 )
-
-		# sort dict_edges
-		sorted_dict = sorted(dict_edges.items(), key=lambda kv: kv[1])
-		
-		print("Optimal distance from {} to {} is {}".format(copy_edges[i], sorted_dict[0][0], sorted_dict[0][1]))
-		result += sorted_dict[0][1]
-
-		# remove from copy_edge
-		copy_edges.pop(i)
-
-		# update i value
-		i = copy_edges.index(sorted_dict[0][0])
-		print('\n')
-
+		if find(u, disjoint_sets) != find(v, disjoint_sets):
+			# add {u,v} to x
+			result += pair[0]
+			# union(u, v)
+			disjoint_sets = union(u, v, disjoint_sets)
 	return result
-
 
 if __name__ == '__main__':
 	input = sys.stdin.read()
