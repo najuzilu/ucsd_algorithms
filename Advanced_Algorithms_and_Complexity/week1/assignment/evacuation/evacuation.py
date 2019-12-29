@@ -1,6 +1,7 @@
 # python3
 import queue
 import sys
+import copy
 
 class Edge:
 
@@ -69,6 +70,8 @@ def shortest_path_distance(graph, s, t):
     distance[s] = 0
     # Add starting node to queue
     L.put(s)
+    # Initialize min_flow array
+    min_flow = [None for _ in range(graph.size())]
 
     # While queue is not empty
     while not L.empty():
@@ -78,40 +81,67 @@ def shortest_path_distance(graph, s, t):
             edge = graph.get_edge(node)
             if distance[edge.v] == len(graph.edges):
                 L.put(edge.v)
+                # print(edge.u, '-', edge.v, ';', edge.flow, ',', edge.capacity)
+                min_flow[edge.v] = edge.flow
                 distance[edge.v] = distance[dequeue_node] + 1
                 previous[edge.v] = dequeue_node
-    return distance, previous
+    return distance, previous, min_flow
 
-def deconstruct_path(from_, to, distance, previous, graph):
+def deconstruct_path(graph, from_, to, previous, min_flow):
     """
         Deconstructs path and returns str of path and 
     """
     path = [to]
-    copy_to = to
-    min_distance = []
 
-    while copy_to:
-        min_distance.append(graph.get_edge(previous[copy_to]).flow)
-        if copy_to == from_:
-            path = [previous[copy_to]] + path
+    while to:
+        if to == from_:
+            path = [previous[to]] + path
             break
 
-        path = [previous[copy_to]] + path
-        copy_to = previous[copy_to]
+        path = [previous[to]] + path
+        to = previous[to]
 
-    return path, min(min_distance)
+    min_value = []
+    for i in range(1, len(path)):
+        min_value.append(min_flow[i])
+    return path, min(min_value)
 
+def residual_graph(graph, s, t):
+    residual_graph = copy.copy(graph)
+
+    L = queue.Queue(maxsize = len(residual_graph.edges))
+    distance = [len(residual_graph.edges) for _ in range(len(residual_graph.edges))]
+    distance[s] = 0
+    L.put(s)
+
+    while not L.empty():
+        dequeue_node = L.get()
+        for node in residual_graph.get_ids(dequeue_node):
+            edge = residual_graph.get_edge(node)
+            edge.flow = edge.capacity
+            # print(edge.u, '-', edge.v, ';', edge.flow, ',', edge.capacity)
+            if distance[edge.v] == len(residual_graph.edges):
+                L.put(edge.v)
+                distance[edge.v] = distance[dequeue_node] + 1
+
+    return residual_graph
 
 def max_flow(graph, from_, to):
-    flow = 0
-    print('from = {}, to = {}, length of graph.edges={}'.format(from_, to, len(graph.edges)))
-
     if len(graph.edges) == 0:
         return 0
 
+    flow = 0
+     # Compute residual graph by placing capacity to flow
+    g_f = residual_graph(graph, from_, to)
+    distance, previous, min_flow = shortest_path_distance(g_f, from_, to)
+    print(">>>", deconstruct_path(g_f, from_, to, previous, min_flow))
+
+
+
+    
     # Have successfully computed shortest path
-    distance, previous = shortest_path_distance(graph, from_, to)
-    print(">>>", deconstruct_path(from_, to, distance, previous, graph))
+    # distance, previous = shortest_path_distance(graph, from_, to)
+    # print(">>>", deconstruct_path(from_, to, distance, previous, graph))
 
     # # # Basic idea of Ford-Fulkerson Algorithm
     # # while True:
